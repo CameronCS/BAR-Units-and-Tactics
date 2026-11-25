@@ -1,0 +1,17 @@
+# Claude
+.claude/
+CLAUDE.md
+CLAUDE.local.md
+
+# Summary files
+SUMMARY.md
+
+# Python
+__pycache__/
+*.pyc
+
+# OS / editor
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
