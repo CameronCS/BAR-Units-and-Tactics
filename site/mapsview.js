@@ -185,7 +185,7 @@ document.addEventListener('click', e => {
   if ((el = t.closest('[data-mtab]'))) { mapTab = el.dataset.mtab; return showMap(mapPage, mapLayout); }
   if ((el = t.closest('[data-mcopy]'))) return copyText(pageBase() + '#map/' + encodeURIComponent(mapPage), el);
   if (t.closest('[data-mbrief]')) { briefMap = mapPage; briefStart = ''; briefSave(); return setView('brief'); }
-  if (t.closest('[data-mroles]')) { rolesMapId = mapPage; rolesLi = -1; rolesTeam = 0; rolesOv = {}; rolesSave(); return setView('roles'); }
+  if (t.closest('[data-mroles]')) { rolesMapId = mapPage; rolesLi = -1; rolesTeam = 0; rolesOv = {}; rolesFacs = {}; rolesNames = {}; rolesSave(); return setView('roles'); }
   if (mapPage) return;
   const mm = t.closest('[data-mm]'), mw = t.closest('[data-mw]'), mv = t.closest('[data-mv]'), card = t.closest('.mcard');
   if (mm) { mstate.mode = mstate.mode === mm.dataset.mm ? '' : mm.dataset.mm; renderMapList(); return; }

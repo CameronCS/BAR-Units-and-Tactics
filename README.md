@@ -57,7 +57,7 @@ How each faction unlocks its tech, with hover highlighting.
 
 ### 🧭 Map briefing and team roles
 - **Briefing**: pick a map and start position for its wind-or-solar advice, metal spots at home, spawn role and a suggested opener with its timing on that map.
-- **Team roles**: give each spawn on your team a role (frontline, economy, air, naval), get the matching guide and income plan for each, and a check for holes in the team. Shareable link.
+- **Team roles**: name each player, pick their faction and give them a role (frontline, economy, air, naval). Each gets the matching guide and an income plan for their own faction, and the team is checked for holes. Shareable as a link or as text for chat.
 
 ### 📈 Changes
 Unit changes between BAR versions, filterable by faction and buff or nerf.

@@ -137,7 +137,7 @@ function route() {
   else if (a === 'equiv') state.view = 'equiv';
   else if (a === 'army') { state.view = 'army'; if (b) armyDec(parts.slice(1).join('/')); }
   else if (a === 'brief') { state.view = 'brief'; briefRoute(parts[1], parts[2], parts[3]); }
-  else if (a === 'roles') { state.view = 'roles'; rolesRoute(parts[1], parts[2], parts[3], parts[4], parts[5]); }
+  else if (a === 'roles') { state.view = 'roles'; rolesRoute(parts[1], parts[2], parts[3], parts[4], parts[5], parts[6], parts[7]); }
   else if (a === 'plan') { state.view = 'plan'; if (b && planDecode(b)) pushHash('#plan'); }
   else if (a === 'vs') { state.view = 'vs'; const [x, y, na, nb] = (b || '').split(','); if (byId[x] && byId[y]) { vsA = x; vsB = y; if (+na > 0) vsNA = Math.min(999, Math.round(+na)); if (+nb > 0) vsNB = Math.min(999, Math.round(+nb)); } }
   else if (a === 'tree') { state.view = 'tree'; if (FACS.includes(b)) { state.tfac = b; store.set('barTFac', b); } }

@@ -105,5 +105,5 @@ document.addEventListener('click', e => {
     const m = MAPS.find(x => x.id === briefMap);
     planFromGuide(briefGuide(m, spawnRole(m, briefStart)), briefFac); planMapId = m.id; planStartSel = briefStart; planAs.wm = 'avg'; planApplyMap(); planSave(); setView('plan'); return;
   }
-  if (t.closest('[data-brroles]')) { rolesMapId = briefMap; rolesFac = briefFac; rolesLi = -1; rolesOv = {}; rolesSave(); setView('roles'); }
+  if (t.closest('[data-brroles]')) { rolesMapId = briefMap; rolesFac = briefFac; rolesLi = -1; rolesOv = {}; rolesFacs = {}; rolesNames = {}; rolesSave(); setView('roles'); }
 }, true);
