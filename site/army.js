@@ -129,7 +129,11 @@ function armyResultHtml(r) {
   else { const w = r.win === 1 ? 'Army A' : 'Army B', f = r.win === 1 ? r.la : r.lb; head = `${w} wins`; sub = `with ${Math.round(f * 100)}% of its metal still alive after ${clock(r.t)}`; }
   if (r.stalled && r.win) sub += `. The loser has nothing that can hurt what is left.`;
   const share = r.win === 1 ? 50 + r.la * 50 : r.win === 2 ? 50 - r.lb * 50 : 50;
+  const m0 = (P, p0) => P.reduce((s, x, i) => s + x.u.metal * p0[i], 0), lostA = m0(r.A, r.a0) * (1 - r.la), lostB = m0(r.B, r.b0) * (1 - r.lb);
+  const trade = lostA > 0 && lostB > 0 ? (lostB >= lostA ? `Army A destroys ${fmt(Math.round(lostB / lostA * 10) / 10)} metal for every 1 it loses.` : `Army B destroys ${fmt(Math.round(lostA / lostB * 10) / 10)} metal for every 1 it loses.`) : (lostA > 0 || lostB > 0 ? `${lostA > 0 ? 'Army B' : 'Army A'} loses nothing.` : '');
+  const cost = `<div class="vstab">${vsRow('Metal at the start', m0(r.A, r.a0), m0(r.B, r.b0), { nowin: true })}${vsRow('Metal lost', Math.round(lostA), Math.round(lostB), { low: true })}${vsRow('Metal destroyed', Math.round(lostB), Math.round(lostA))}</div>${trade ? `<p class="note" style="margin:0 0 var(--s3)">${trade}</p>` : ''}`;
   return `<div class="vsverd" data-w="${r.win}"><div class="vsmeter"><i style="width:${share}%;background:${ARMYC[0]}"></i><i style="width:${100 - share}%;background:${ARMYC[1]}"></i></div><h3>${head}</h3>${sub ? `<p>${sub}</p>` : ''}</div>
+    ${cost}
     <div class="vscols"><div><h4 style="color:${ARMYC[0]}">Army A at the end</h4><ul class="vsw">${names(r.A, r.a0)}</ul></div><div><h4 style="color:${ARMYC[1]}">Army B at the end</h4><ul class="vsw">${names(r.B, r.b0)}</ul></div></div>
     <div class="vsshare" style="margin-top:var(--s3)"><button class="vsswap" data-share="army-link">Copy link</button></div>
     <p class="note">The fight is simulated in half-second steps. Each group spreads its fire over the enemy groups it can hurt, by health. Range, speed, splash damage and micro are ignored, and every unit fires from the start.</p>`;
@@ -158,4 +162,10 @@ document.addEventListener('click', e => {
   else if ((el = g('data-plopen'))) { return openUnit(el.dataset.plopen); }
   else return;
   armySave(); pushHash(viewHash()); renderArmy();
+}, true);
+
+// "Build armies from this" on the Versus page: carry both units and their sizes over
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-vstoarmy]'); if (!b) return;
+  e.stopPropagation(); armySide = [[{ id: vsA, n: vsNA }], [{ id: vsB, n: vsNB }]]; armySave(); setView('army'); pushHash(viewHash());
 }, true);

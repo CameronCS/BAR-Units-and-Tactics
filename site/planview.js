@@ -92,7 +92,7 @@ function planSim() {
       const start = planEff(inc), first = planCalc(u, inc); let t = 0; const gain = { m: 0, e: 0, bp: 0, noSpot: 0 };
       for (let k = 0; k < x.q; k++) {
         const c = planCalc(u, inc), t0 = time + t; t += c.t; const d = add(u, 1), after = planEff(inc);
-        segs.push({ t0, t1: time + t, lim: c.lim, name: u.name, si }); pts.push({ t: time + t, m: after.m, e: after.e, bp: after.bp });
+        segs.push({ t0, t1: time + t, lim: c.lim, name: u.name, si, ii }); pts.push({ t: time + t, m: after.m, e: after.e, bp: after.bp });
         gain.m += d.m; gain.e += d.e; gain.bp += d.bp; gain.noSpot += d.noSpot; }
       time += t; sum.m += u.metal * x.q; sum.e += u.energy * x.q;
       return { ii, u, q: x.q, done: false, p, gain, c: first, t, start, g: x.g, note: x.note };
@@ -171,7 +171,38 @@ function planChart(sim) {
   const note = stall.length
     ? `Shaded stretches are where your income, not your build power, sets the pace: ${stall.length} ${stall.length === 1 ? 'unit' : 'units'}, ${clock(stall.reduce((s, x) => s + x.t1 - x.t0, 0))} in all. The longest is ${worst.name} (${clock(worst.t1 - worst.t0)}, held back by ${worst.lim.toLowerCase()}).`
     : 'Nothing in this plan is held back by income: build power is the limit all the way through.';
-  return `<section class="plsec"><h3 class="cap">Income timeline</h3><div class="plcw"><svg class="plchart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Metal, energy and build power over the course of the plan">${svg}</svg></div><p class="note">${note} Time counts from now, with ticked items already built.</p></section>`;
+  return `<section class="plsec"><h3 class="cap">Income timeline</h3><div class="plcw"><svg class="plchart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Metal, energy and build power over the course of the plan">${svg}</svg></div><p class="note">${note} Time counts from now, with ticked items already built.</p>${planFixHtml(sim)}</section>`;
+}
+
+// ---- fix the biggest stall: try adding a few of each income unit just before the stalled item and keep what finishes the plan soonest
+function planFix(sim) {
+  const base = sim.time; if (!isFinite(base) || base <= 0) return null;
+  const worst = sim.segs.filter(s => /income/.test(s.lim)).reduce((a, s) => (!a || s.t1 - s.t0 > a.t1 - a.t0) ? s : a, null);
+  if (!worst || worst.t1 - worst.t0 < Math.max(5, base * .03)) return null;
+  const res = /Metal/.test(worst.lim) ? 'm' : 'e', word = res === 'm' ? 'metal' : 'energy';
+  const score = u => { const p = planProd(u); return (res === 'm' ? Math.max(p.m, p.cm) : p.e) / Math.max(1, u.metal + u.energy / 60); };
+  const pool = planPool().filter(u => score(u) > 0).sort((a, b) => score(b) - score(a)).slice(0, 12);
+  const sv = planS, out = [];
+  try {
+    for (const u of pool) {
+      let best = null;
+      for (const k of [1, 2, 3, 4, 6, 8]) {
+        planS = sv.map((st, si) => si === worst.si ? { ...st, items: [...st.items.slice(0, worst.ii), { id: u.id, q: k }, ...st.items.slice(worst.ii)] } : st);
+        const t = planSim().time; if (!best || t < best.t) best = { u, q: k, t };
+      }
+      if (best && best.t < base * .97) out.push(best);
+    }
+  } finally { planS = sv; }
+  out.sort((a, b) => a.t - b.t);
+  return { worst, word, base, list: out.slice(0, 3), stage: planS[worst.si] ? planS[worst.si].name : '' };
+}
+function planFixHtml(sim) {
+  const f = planFix(sim); if (!f) return '';
+  if (!f.list.length) return `<p class="note">The biggest stall is ${f.worst.name}, held back by ${f.word} income, but no single extra building speeds the whole plan up by 3% or more.</p>`;
+  const esc = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;');
+  return `<h4 class="agh">Fix the biggest stall</h4><p class="note" style="margin:0 0 var(--s2)">${esc(f.worst.name)} waits ${clock(f.worst.t1 - f.worst.t0)} for ${f.word} income. Adding more ${f.word} first would finish the whole plan sooner:</p>
+    <ul class="plfix">${f.list.map(x => `<li><span>Add <b>${x.q} ${esc(x.u.name)}</b> before <b>${esc(f.worst.name)}</b> in ${esc(f.stage)}: finish <b>${clock(f.base - x.t)} sooner</b> (${clock(f.base)} to ${clock(x.t)})</span><button class="vsswap" data-plfix="${f.worst.si},${f.worst.ii},${x.u.id},${x.q}">Add to plan</button></li>`).join('')}</ul>
+    <p class="note">Each suggestion is tried on its own, in the same simulation as the timeline, so it already counts the cost and build time of what it adds.</p>`;
 }
 
 function renderPlan() {
@@ -388,6 +419,7 @@ document.addEventListener('click', e => {
   else if ((el = g('data-plsu'))) { const i = Number(el.dataset.plsu); if (i > 0) [planS[i - 1], planS[i]] = [planS[i], planS[i - 1]]; }
   else if ((el = g('data-plsw'))) { const i = Number(el.dataset.plsw); if (i < planS.length - 1) [planS[i + 1], planS[i]] = [planS[i], planS[i + 1]]; }
   else if ((el = g('data-pladd'))) return planOpenPick(Number(el.dataset.pladd));
+  else if ((el = g('data-plfix'))) { const [si, ii, id, q] = el.dataset.plfix.split(','); if (planS[si] && byId[id]) planS[si].items.splice(Number(ii), 0, { id, q: Number(q) }); }
   else if ((el = g('data-plopen'))) return openUnit(el.dataset.plopen);
   else return;
   planSave(); renderPlan();

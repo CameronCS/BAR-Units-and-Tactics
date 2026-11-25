@@ -46,10 +46,11 @@ How each faction unlocks its tech, with hover highlighting.
 - **Planner**: stages with check marks. Ticked items add their metal, energy and build power, and everything left is timed against the income you'd have by then.
 - Counts energy converters and extractors on real metal spots, and warns when there's no free spot.
 - **Income timeline**: metal, energy and build power over the course of the plan, with the stretches where income (not build power) holds you back shaded.
+- **Stall fixes**: for the biggest stretch held back by income, it tries adding a few income buildings just before it and suggests the ones that finish the plan soonest, with an Add to plan button.
 - Pick a faction, commander, map, start position and wind level. Share a plan as a link or as text.
 
 ### 🪖 Army builder and faction equivalents
-- **Army builder**: build two armies from any mix of units, see what each can and cannot hit (anti-air, ships, subs) with one-click fixes, then fight them in a simulation. Shareable link.
+- **Army builder**: build two armies from any mix of units, see what each can and cannot hit (anti-air, ships, subs) with one-click fixes, then fight them in a simulation that also shows the metal each side lost and destroyed. Shareable link. Versus has a button that carries a matchup over.
 - **Equivalents**: the three factions side by side by category, tech level and role.
 
 ### 🧭 Map briefing and team roles

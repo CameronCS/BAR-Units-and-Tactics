@@ -107,7 +107,7 @@ function renderVs() {
       <span>against</span><label><span style="color:${VSC[1]}">${b.name}</span> <input type="number" id="vsnb" min="1" max="999" value="${vsNB}"></label>
       <button class="vsswap" id="vseq">Match metal</button>
       <label class="vsrg"><input type="checkbox" id="vsrange" ${Combat.range ? 'checked' : ''}> Include range and speed</label></div>
-    <div class="vsshare"><button class="vsswap" data-share="vs-link">Copy link</button><button class="vsswap" data-share="vs-text">Copy as text</button></div>
+    <div class="vsshare"><button class="vsswap" data-share="vs-link">Copy link</button><button class="vsswap" data-share="vs-text">Copy as text</button><button class="vsswap" data-vstoarmy="1">Build armies from this</button></div>
     <div id="vsout">${fightHtml(a, b)}</div>`;
 }
 
