@@ -39,7 +39,7 @@ How each faction unlocks its tech, with hover highlighting.
 - A uniform grid (or a compact list) with search, player-count, water and pool filters. Each map opens as a full page: the map on one side, and tabs for Overview (energy and metal read, facts), Spawns and metal (layouts, overlays, who spawns where) and Draw.
 - 199 official maps with spawn layouts and roles, map pools, wind and tidal.
 - Metal spots drawn on the map (198 of 199 maps imported; Greenest Fields has none to find).
-- **Draw on any map**: lettered start boxes like the BAR lobby, spawn markers by team, pen, arrows, erase and undo. Saved in your browser and shareable as a link.
+- **Draw on any map**: lettered start boxes like the BAR lobby, spawn markers by team, pen and arrows. Click to select anything, then move it, resize a box by its corners, recolour it or delete it (Delete key). Undo and redo (Ctrl+Z / Ctrl+Y) cover every change, and one letter picks a tool. You can copy the map's own spawns or start areas into your drawing to edit them. Saved in your browser and shareable as a link.
 - **Suggest good spawns**: picks the spots with the most metal in reach, one per start area or spread across the map.
 
 ### 📋 Guides and build planner
