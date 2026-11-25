@@ -37,7 +37,7 @@ How each faction unlocks its tech, with hover highlighting.
 
 ### 🗺️ Maps
 - 199 official maps with spawn layouts and roles, map pools, wind and tidal.
-- Metal spots drawn on the map (24 maps imported so far).
+- Metal spots drawn on the map (198 of 199 maps imported; Greenest Fields has none to find).
 - **Draw on any map**: lettered start boxes like the BAR lobby, spawn markers by team, pen, arrows, erase and undo. Saved in your browser and shareable as a link.
 - **Suggest good spawns**: picks the spots with the most metal in reach, one per start area or spread across the map.
 
