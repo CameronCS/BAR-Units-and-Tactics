@@ -51,6 +51,7 @@ How each faction unlocks its tech, with hover highlighting.
 
 ### 🪖 Army builder and faction equivalents
 - **Army builder**: build two armies from any mix of units, see what each can and cannot hit (anti-air, ships, subs) with one-click fixes, then fight them in a simulation that also shows the metal each side lost and destroyed. Shareable link. Versus has a button that carries a matchup over.
+- **Counter finder**: pick an army and it builds a counter for the same metal (or a share of it) from any faction or one, using the fight simulation. Undo restores your armies.
 - **Equivalents**: the three factions side by side by category, tech level and role.
 
 ### 🧭 Map briefing and team roles
