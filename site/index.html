@@ -53,6 +53,13 @@ kbd{font:500 11px var(--body);border:1px solid var(--line2);border-bottom-width:
 .nav1 button:hover{color:var(--ink)}
 .nav1 button[aria-current=page]{color:var(--ink)}
 .nav1 button[aria-current=page]::after{content:"";position:absolute;left:var(--s4);right:var(--s4);bottom:0;height:4px;background:var(--acc)}
+.ngrp{position:relative;height:100%;display:flex}
+.ngb{display:flex;align-items:center;gap:7px}.ngb::before{content:"";order:2;border:4px solid transparent;border-top-color:currentColor;border-bottom:0;margin-top:2px}
+.ngrp:hover .ngb,.ngrp.open .ngb{color:var(--ink)}
+.ndrop{display:none;position:absolute;top:100%;left:0;min-width:220px;flex-direction:column;background:var(--bg2);border:1px solid var(--line2);border-top:3px solid var(--acc);box-shadow:var(--shadow);padding:4px 0;z-index:35}
+.ngrp:hover .ndrop,.ngrp.open .ndrop,.ngrp:focus-within .ndrop{display:flex}
+.nav1 .ndrop button{height:auto;width:100%;padding:11px var(--s4);display:flex;justify-content:space-between;align-items:center;text-align:left;font:700 19px/1 var(--head);color:var(--mute)}
+.nav1 .ndrop button:hover{background:var(--panel2);color:var(--ink)}.nav1 .ndrop button[aria-current=page]{color:var(--acc)}.nav1 .ndrop button[aria-current=page]::after{display:none}
 .tophint{margin-left:auto;display:flex;align-items:center;gap:var(--s2);color:var(--mute);font-size:13px;background:none;border:1px solid var(--line);padding:6px 12px;cursor:pointer}
 .tophint:hover{border-color:var(--acc);color:var(--ink)}
 
@@ -543,6 +550,9 @@ blockquote{margin:var(--s3) 0;padding:6px 0 6px var(--s4);border-left:4px solid 
   .nav1 button{padding:0;height:50px;text-align:left;font-size:24px;border-bottom:1px solid var(--line)}.nav1 button:last-child{border-bottom:0}
   .nav1 button small{display:inline}
   .nav1 button[aria-current=page]{color:var(--acc)}.nav1 button[aria-current=page]::after{display:none}
+  .ngrp{display:block;height:auto}.nav1 .ngb{pointer-events:none;height:30px;font-size:13px;letter-spacing:1.6px;color:var(--acc);border-bottom:0;margin-top:var(--s3)}.ngb::before,.ngb::after{display:none!important}
+  .ndrop{display:flex!important;position:static;min-width:0;border:0;box-shadow:none;background:none;padding:0}
+  .nav1 .ndrop button{height:46px;padding:0 0 0 var(--s3);font-size:22px;border-bottom:1px solid var(--line);justify-content:flex-start}.nav1 .ndrop button:hover{background:none}
   .shell{grid-template-columns:minmax(0,1fr);padding:var(--s4)}
   .shell>*{min-width:0}
   .filtbtn{display:block}

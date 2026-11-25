@@ -151,10 +151,14 @@ function route() {
 
 // ---- chrome: top bar, hero, sidebar ----------------------------------------
 const TITLES = { units: 'Units', tree: 'Tech tree', maps: 'Maps', guides: 'Build guides', changes: 'Balance changes', vs: 'Versus', plan: 'Build planner', army: 'Army builder', brief: 'Map briefing', roles: 'Team roles', equiv: 'Faction equivalents' };
+// the sections, grouped so the bar stays short: each group is a dropdown on a wide screen and a labelled list in the phone menu
+const NAVG = [['Units', [['units', 'Units'], ['tree', 'Tech tree'], ['equiv', 'Equivalents'], ['changes', 'Changes']]], ['Fight', [['vs', 'Versus'], ['army', 'Army builder']]],
+  ['Plan', [['plan', 'Planner'], ['guides', 'Guides']]], ['Maps', [['maps', 'Maps'], ['brief', 'Briefing'], ['roles', 'Team roles']]]];
 function buildNav() {
-  const items = [['units', 'Units', U.length], ['tree', 'Tech tree', null], ['vs', 'Versus', null], ['plan', 'Planner', null], ['army', 'Army', null], ['equiv', 'Equivalents', null], ['maps', 'Maps', MAPS.length], ['brief', 'Briefing', null], ['roles', 'Team roles', null], ['changes', 'Changes', CHG.length ? CHG[0].changed.length + CHG[0].added.length + CHG[0].removed.length : null], ['guides', 'Guides', null]];
-  $('#nav1').innerHTML = items.map(([v, t, n]) => `<button data-view="${v}"${state.view === v ? ' aria-current="page"' : ''}>${t}${n ? `<small>${n}</small>` : ''}</button>`).join('');
-  document.title = `${TITLES[state.view]} · BAR Unit Database`;
+  const cnt = { units: U.length, maps: MAPS.length, changes: CHG.length ? CHG[0].changed.length + CHG[0].added.length + CHG[0].removed.length : null };
+  $('#nav1').innerHTML = NAVG.map(([g, items]) => `<div class="ngrp"><button class="ngb" type="button" aria-haspopup="true" aria-expanded="false"${items.some(x => x[0] === state.view) ? ' aria-current="page"' : ''}>${g}</button>
+    <div class="ndrop">${items.map(([v, t]) => `<button data-view="${v}"${state.view === v ? ' aria-current="page"' : ''}>${t}${cnt[v] ? `<small>${cnt[v]}</small>` : ''}</button>`).join('')}</div></div>`).join('');
+document.title = `${TITLES[state.view]} · BAR Unit Database`;
 }
 function buildHero() {
   const hero = $('#fhero'), on = state.view === 'units';
@@ -276,6 +280,13 @@ function setMaps() { setView('maps'); }
 function clearFilters() { state.favOnly = false; state.cat.clear(); state.tier.clear(); resetRanges(); state.q = ''; $('#q').value = ''; buildTiers(); render(); }
 
 $('#nav1').onclick = e => { const b = e.target.closest('[data-view]'); if (b) setView(b.dataset.view); };
+function closeNavGroups(except) { document.querySelectorAll('.ngrp.open').forEach(g => { if (g !== except) { g.classList.remove('open'); g.querySelector('.ngb').setAttribute('aria-expanded', 'false'); } }); }
+$('#nav1').addEventListener('click', e => {
+  const b = e.target.closest('.ngb'); if (!b) return;
+  const g = b.parentElement, on = !g.classList.contains('open'); closeNavGroups(g); g.classList.toggle('open', on); b.setAttribute('aria-expanded', on);
+});
+document.addEventListener('click', e => { if (!e.target.closest('.ngrp')) closeNavGroups(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeNavGroups(); });
 $('#fhero').onclick = e => { const b = e.target.closest('.ftab'); if (b) setFac(b.dataset.fac); };
 $('#types').onclick = e => {
   const b = e.target.closest('button'); if (!b) return;
