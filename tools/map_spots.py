@@ -159,6 +159,8 @@ def run(argv):
                 if '/' in cr and int(cr.split('/')[-1]) > max_mb * 1e6:
                     print('skipped (too big):', m['n']); return
             res = process(m, tmp_root)
+            if not res['s']:     # no spots found (metal comes from somewhere else on this map): keep it out, or the planner would say every extractor has no spot
+                print(f"{m['n']}: no metal spots found, left out"); return
             with LOCK:
                 store[m['id']] = res
                 json.dump(store, open(STORE, 'w', encoding='utf8'), separators=(',', ':'))
