@@ -126,12 +126,12 @@ const short = x => x.replace(/ \(.*\)/, '');
 
 // ---- routing: shareable links ---------------------------------------------
 // #units  #units/Cortex  #maps  #guides  #unit/armpw  #map/<file name>
-const viewHash = () => state.view === 'tree' ? '#tree/' + state.tfac : state.view === 'maps' ? '#maps' : state.view === 'changes' ? '#changes' : state.view === 'plan' ? '#plan' : state.view === 'army' ? '#army/' + armyEnc() : state.view === 'brief' ? briefHash() : state.view === 'roles' ? rolesHash() : state.view === 'equiv' ? '#equiv' : state.view === 'vs' ? '#vs/' + vsA + ',' + vsB + ',' + vsNA + ',' + vsNB : state.view === 'guides' ? '#guides' : '#units' + (state.fac !== 'All' ? '/' + state.fac : '');
+const viewHash = () => state.view === 'tree' ? '#tree/' + state.tfac : state.view === 'maps' ? (mapPage ? '#map/' + encodeURIComponent(mapPage) : '#maps') : state.view === 'changes' ? '#changes' : state.view === 'plan' ? '#plan' : state.view === 'army' ? '#army/' + armyEnc() : state.view === 'brief' ? briefHash() : state.view === 'roles' ? rolesHash() : state.view === 'equiv' ? '#equiv' : state.view === 'vs' ? '#vs/' + vsA + ',' + vsB + ',' + vsNA + ',' + vsNB : state.view === 'guides' ? '#guides' : '#units' + (state.fac !== 'All' ? '/' + state.fac : '');
 const pushHash = h => { try { history.replaceState(null, '', h); } catch (e) {} };
 function route() {
   const h = decodeURIComponent(location.hash.replace(/^#\/?/, '')), parts = h.split('/'), [a, b, c] = parts;
   let open = null;
-  if (a === 'maps' || a === 'map') { state.view = 'maps'; if (a === 'map' && mapById[b]) open = () => { openMap(b); if (c && drawImport(b, c)) showMap(b, mapLayout); }; }
+  if (a === 'maps' || a === 'map') { state.view = 'maps'; mapPage = null; curMapId = null; if (a === 'map' && mapById[b]) open = () => { openMap(b); if (c && drawImport(b, c)) showMap(b, mapLayout); }; }
   else if (a === 'guides') state.view = 'guides';
   else if (a === 'changes') state.view = 'changes';
   else if (a === 'equiv') state.view = 'equiv';
@@ -264,6 +264,7 @@ function render() {
 // ---- events ---------------------------------------------------------------
 function setView(v) {
   state.view = v; store.set('barView', v);
+  if (v === 'maps') { mapPage = null; curMapId = null; }
   closeUnit(true); build(); render(); pushHash(viewHash()); window.scrollTo(0, 0);
 }
 function setFac(f) {

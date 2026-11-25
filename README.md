@@ -36,6 +36,7 @@ Then open **`site/index.html`** in your browser. That's it. It's plain HTML, CSS
 How each faction unlocks its tech, with hover highlighting.
 
 ### 🗺️ Maps
+- A uniform grid (or a compact list) with search, player-count, water and pool filters. Each map opens as a full page: the map on one side, and tabs for Overview (energy and metal read, facts), Spawns and metal (layouts, overlays, who spawns where) and Draw.
 - 199 official maps with spawn layouts and roles, map pools, wind and tidal.
 - Metal spots drawn on the map (198 of 199 maps imported; Greenest Fields has none to find).
 - **Draw on any map**: lettered start boxes like the BAR lobby, spawn markers by team, pen, arrows, erase and undo. Saved in your browser and shareable as a link.
