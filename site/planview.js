@@ -84,26 +84,29 @@ function planSim() {
   planS.forEach(st => st.items.forEach(i => { if (i.done) gains.set(i, add(byId[i.id], i.q)); }));
   Object.assign(now, planEff(inc));
   let time = 0; const sum = { m: 0, e: 0, done: 0, all: 0 };
-  const stages = planS.map(st => {
+  const start = planEff(inc), pts = [{ t: 0, m: start.m, e: start.e, bp: start.bp }], segs = [];   // timeline for the chart: income after each unit, and the stretches held back by income
+  const stages = planS.map((st, si) => {
     const rows = st.items.map((x, ii) => {
       const u = byId[x.id], p = planProd(u); sum.all++;
       if (x.done) { sum.done++; return { ii, u, q: x.q, done: true, p, gain: gains.get(x), g: x.g, note: x.note }; }
       const start = planEff(inc), first = planCalc(u, inc); let t = 0; const gain = { m: 0, e: 0, bp: 0, noSpot: 0 };
-      for (let k = 0; k < x.q; k++) { t += planCalc(u, inc).t; const d = add(u, 1); gain.m += d.m; gain.e += d.e; gain.bp += d.bp; gain.noSpot += d.noSpot; }
+      for (let k = 0; k < x.q; k++) {
+        const c = planCalc(u, inc), t0 = time + t; t += c.t; const d = add(u, 1), after = planEff(inc);
+        segs.push({ t0, t1: time + t, lim: c.lim, name: u.name, si }); pts.push({ t: time + t, m: after.m, e: after.e, bp: after.bp });
+        gain.m += d.m; gain.e += d.e; gain.bp += d.bp; gain.noSpot += d.noSpot; }
       time += t; sum.m += u.metal * x.q; sum.e += u.energy * x.q;
       return { ii, u, q: x.q, done: false, p, gain, c: first, t, start, g: x.g, note: x.note };
     });
     return { rows, ready: time, end: planEff(inc), left: rows.filter(r => !r.done) };
   });
-  return { stages, now, end: planEff(inc), time, sum, over, spots: vals ? vals.length : null, used: inc.sl.length };
+  return { stages, pts, segs, now, end: planEff(inc), time, sum, over, spots: vals ? vals.length : null, used: inc.sl.length };
 }
 
 // ---- load a build order from the guides
 const FACTORY_ROLES = new Set(['botlab', 'vehlab', 'airlab', 'shipyard', 't2bot', 't2veh', 't2air']);
 const guideQty = n => typeof n === 'number' ? n : Math.max(1, Number((String(n || '1').match(/\d+/) || [1])[0]));
-function planFromGuide(id, f) {
-  const G = window.GUIDES, st = G && G.styles.find(s => s.id === id); if (!st) return;
-  planPrev = JSON.stringify({ st: planS, fac: planFac, map: planMapId, as: planAs, x: planX });
+function planStagesFromGuide(id, f) {
+  const G = window.GUIDES, st = G && G.styles.find(s => s.id === id); if (!st) return null;
   const stages = [{ name: 'Opening', items: [] }]; let missing = 0, ranges = 0;
   st.steps.forEach(s => {
     const uid = G.roles[s.r] && G.roles[s.r][f];
@@ -113,7 +116,13 @@ function planFromGuide(id, f) {
     if (typeof s.n === 'string') ranges++;
     cur.items.push({ id: uid, q: guideQty(s.n), g: typeof s.n === 'string' ? s.n : undefined, note: s.t });
   });
-  planFac = f; planS = stages.filter(x => x.items.length);
+  return { st, stages: stages.filter(x => x.items.length), missing, ranges };
+}
+function planFromGuide(id, f) {
+  const r = planStagesFromGuide(id, f); if (!r) return;
+  const { st, missing, ranges } = r;
+  planPrev = JSON.stringify({ st: planS, fac: planFac, map: planMapId, as: planAs, x: planX });
+  planFac = f; planS = r.stages;
   planNote = `Loaded the ${st.name} build order for ${f}.` + (ranges ? ` Where the guide gives a range, such as 2 to 3, the planner uses the lowest number and shows the guide's range.` : '') + (missing ? ` ${missing} step(s) had no ${f} unit and were skipped.` : '');
 }
 
@@ -132,6 +141,37 @@ function planSwitch(f) {
   planS.forEach(st => { st.items = st.items.map(i => { const id = planMap(i.id, f); if (!id) { dropped++; return null; } return { ...i, id }; }).filter(Boolean); });
   planFac = f;
   planNote = dropped ? `${dropped} ${dropped === 1 ? 'unit' : 'units'} had no ${f} equivalent and ${dropped === 1 ? 'was' : 'were'} removed.` : '';
+}
+
+
+// ---- income timeline: what you earn over the course of the plan, with the stretches where income holds you back
+function planChart(sim) {
+  const { pts, segs, time } = sim; if (!segs.length || !isFinite(time) || time <= 0) return '';
+  const W = 860, L = 52, R = 14, T = 22, strips = [['m', 'Metal/s', '#7fb8ff'], ['e', 'Energy/s', '#ffe27a'], ['bp', 'Build power', '#6fe09a']], SH = 74, GAP = 22;
+  const H = T + strips.length * (SH + GAP) + 14, X = t => L + t / time * (W - L - R);
+  const stall = segs.filter(s => /income/.test(s.lim) && s.t1 - s.t0 > time * .004);
+  const bands = stall.map(s => `<rect x="${X(s.t0).toFixed(1)}" y="${T}" width="${Math.max(2, X(s.t1) - X(s.t0)).toFixed(1)}" height="${H - T - 14}" style="fill:var(--bad);opacity:.16"><title>${s.name}: held back by ${s.lim.toLowerCase()} for ${clock(s.t1 - s.t0)}</title></rect>`).join('');
+  const ticks = []; const step = [10, 15, 30, 60, 120, 180, 300, 600, 900, 1800].find(v => time / v <= 8) || 3600;
+  for (let t = 0; t <= time; t += step) ticks.push(t);
+  let svg = bands;
+  ticks.forEach(t => { svg += `<line x1="${X(t).toFixed(1)}" x2="${X(t).toFixed(1)}" y1="${T}" y2="${H - 14}" style="stroke:var(--line)" stroke-width="1"/><text x="${X(t).toFixed(1)}" y="${H - 2}" text-anchor="middle" style="fill:var(--mute)" font-size="11">${clock(t)}</text>`; });
+  let cum = 0;
+  planS.forEach((st, si) => { const r = sim.stages[si].ready; if (si && sim.stages[si].left.length && r > cum) svg += `<line x1="${X(cum).toFixed(1)}" x2="${X(cum).toFixed(1)}" y1="${T - 6}" y2="${H - 14}" style="stroke:var(--line2)" stroke-dasharray="3 3"/><text x="${X(cum) + 4}" y="${T - 9}" style="fill:var(--ink)" font-size="11">${st.name.replace(/&/g, '&amp;').replace(/</g, '&lt;')}</text>`; if (sim.stages[si].left.length) cum = r; });
+  if (planS.length && sim.stages[0].left.length) svg += `<text x="${L + 4}" y="${T - 9}" style="fill:var(--ink)" font-size="11">${planS[0].name.replace(/&/g, '&amp;').replace(/</g, '&lt;')}</text>`;
+  strips.forEach(([k, label, col], i) => {
+    const y0 = T + i * (SH + GAP) + 4, hi = Math.max(1, ...pts.map(p => p[k])) * 1.1, Y = v => y0 + SH - Math.max(0, v) / hi * SH;
+    let d = `M${X(0).toFixed(1)} ${Y(pts[0][k]).toFixed(1)}`;
+    for (let j = 1; j < pts.length; j++) d += ` H${X(pts[j].t).toFixed(1)} V${Y(pts[j][k]).toFixed(1)}`;
+    d += ` H${X(time).toFixed(1)}`;
+    svg += `<line x1="${L}" x2="${W - R}" y1="${y0 + SH}" y2="${y0 + SH}" style="stroke:var(--line2)"/><text x="${L - 6}" y="${y0 + 9}" text-anchor="end" style="fill:var(--mute)" font-size="11">${rate(hi / 1.1)}</text><text x="${L - 6}" y="${y0 + SH}" text-anchor="end" style="fill:var(--mute)" font-size="11">0</text>`
+      + `<text x="${L + 4}" y="${y0 + 11}" style="fill:${col}" font-size="12" font-weight="600">${label}</text>`
+      + `<path d="${d} V${y0 + SH} H${X(0).toFixed(1)} Z" fill="${col}" opacity=".12"/><path d="${d}" fill="none" stroke="${col}" stroke-width="2"/>`;
+  });
+  const worst = stall.slice().sort((a, b) => (b.t1 - b.t0) - (a.t1 - a.t0))[0];
+  const note = stall.length
+    ? `Shaded stretches are where your income, not your build power, sets the pace: ${stall.length} ${stall.length === 1 ? 'unit' : 'units'}, ${clock(stall.reduce((s, x) => s + x.t1 - x.t0, 0))} in all. The longest is ${worst.name} (${clock(worst.t1 - worst.t0)}, held back by ${worst.lim.toLowerCase()}).`
+    : 'Nothing in this plan is held back by income: build power is the limit all the way through.';
+  return `<section class="plsec"><h3 class="cap">Income timeline</h3><svg class="plchart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Metal, energy and build power over the course of the plan">${svg}</svg><p class="note">${note} Time counts from now, with ticked items already built.</p></section>`;
 }
 
 function renderPlan() {
@@ -185,6 +225,7 @@ function renderPlan() {
           <label>Metal spot value <input type="number" step="0.1" min="0.1" value="${planAs.spot}" data-plas="spot"></label><label>Wind per turbine <input type="number" step="1" min="0" value="${planAs.wind}" data-plas="wind"></label><label>Tidal per generator <input type="number" step="1" min="0" value="${planAs.tidal}" data-plas="tidal"></label>
           <label>Converters may use <input type="number" step="5" min="0" max="100" value="${planAs.conv}" data-plas="conv"> % of energy income</label></div>
         <p class="note">Extra income is anything you have outside this plan. An extractor gives its rating times the spot value, so a standard spot of 2 gives a basic extractor 2 metal/s. Wind and tidal vary by map. Energy converters turn spare energy into metal: the planner lets them use the share of your energy income set above (up to their capacity), so building still has energy left, and counts the metal they make. Every builder in the plan is assumed to work together on each unit.</p></details></section>
+    ${planChart(sim)}
     ${stages}
     <div class="plact"><button class="vsswap" id="pladds">Add stage</button></div>
     ${planShareHtml()}
@@ -214,10 +255,10 @@ function planStartOptions(m) {
   return out;
 }
 // split the map's spots into "your start area" and "nearby"
-function planSpotGroups() {
-  const m = planMapObj(), sp = planSp(); if (!m || !sp) return null;
+function planSpotGroups(mid = planMapId, startSel = planStartSel) {
+  const m = mid ? MAPS.find(x => x.id === mid) : null, sp = planSp(mid); if (!m || !sp) return null;
   const all = sp.s.map(s => ({ x: s[0], y: s[1], v: spotValue(sp, s) }));
-  const sel = planStartSel.split(':'), lay = layoutsOf(m)[Number(sel[0])];
+  const sel = startSel.split(':'), lay = layoutsOf(m)[Number(sel[0])];
   if (!lay || sel.length < 2) return { all, area: null, near: null };
   const W = m.w * 512, H = m.h * 512;
   let inside, nearby;
@@ -239,7 +280,7 @@ function planSpotGroups() {
   const area = all.filter(inside), near = all.filter(s => !inside(s) && nearby(s));
   return { all, area, near };
 }
-const planSp = () => planMapId && window.MAPSPOTS && window.MAPSPOTS[planMapId];
+const planSp = (mid = planMapId) => mid && window.MAPSPOTS && window.MAPSPOTS[mid];
 // the values extractors will get, best first: your start area, then nearby, then (with no position chosen) the whole map
 function planSpotVals() {
   const g = planSpotGroups(); if (!g) return null;

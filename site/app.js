@@ -17,11 +17,11 @@ const store = {
 let openSet = new Set(store.get('barOpen', []));
 state.fac = FACS.includes(store.get('barFac', '')) ? store.get('barFac', '') : 'All';
 state.tfac = FACS.includes(store.get('barTFac', '')) ? store.get('barTFac', '') : 'Armada';
-state.view = ['guides', 'maps', 'tree', 'changes', 'vs', 'plan'].includes(store.get('barView', 'units')) ? store.get('barView', 'units') : 'units';
+state.view = ['guides', 'maps', 'tree', 'changes', 'vs', 'plan', 'army', 'brief', 'roles', 'equiv'].includes(store.get('barView', 'units')) ? store.get('barView', 'units') : 'units';
 state.gfac = FACS.includes(store.get('barGFac', '')) ? store.get('barGFac', '') : 'Armada';
 state.gstyle = store.get('barGStyle', 'opener');
 state.dens = store.get('barDens', 'cards') === 'list' ? 'list' : 'cards';
-const theme = () => { document.body.dataset.fac = state.view === 'guides' ? state.gfac : state.view === 'tree' ? state.tfac : state.view === 'maps' || state.view === 'changes' || state.view === 'vs' || state.view === 'plan' ? 'All' : state.fac; };
+const theme = () => { document.body.dataset.fac = state.view === 'guides' ? state.gfac : state.view === 'tree' ? state.tfac : ['maps', 'changes', 'vs', 'plan', 'army', 'brief', 'roles', 'equiv'].includes(state.view) ? 'All' : state.fac; };
 
 // ---- starred units (kept in this browser)
 const favs = new Set(); try { JSON.parse(localStorage.getItem('barFav') || '[]').forEach(id => byId[id] && favs.add(id)); } catch (e) {}
@@ -126,14 +126,18 @@ const short = x => x.replace(/ \(.*\)/, '');
 
 // ---- routing: shareable links ---------------------------------------------
 // #units  #units/Cortex  #maps  #guides  #unit/armpw  #map/<file name>
-const viewHash = () => state.view === 'tree' ? '#tree/' + state.tfac : state.view === 'maps' ? '#maps' : state.view === 'changes' ? '#changes' : state.view === 'plan' ? '#plan' : state.view === 'vs' ? '#vs/' + vsA + ',' + vsB + ',' + vsNA + ',' + vsNB : state.view === 'guides' ? '#guides' : '#units' + (state.fac !== 'All' ? '/' + state.fac : '');
+const viewHash = () => state.view === 'tree' ? '#tree/' + state.tfac : state.view === 'maps' ? '#maps' : state.view === 'changes' ? '#changes' : state.view === 'plan' ? '#plan' : state.view === 'army' ? '#army/' + armyEnc() : state.view === 'brief' ? briefHash() : state.view === 'roles' ? rolesHash() : state.view === 'equiv' ? '#equiv' : state.view === 'vs' ? '#vs/' + vsA + ',' + vsB + ',' + vsNA + ',' + vsNB : state.view === 'guides' ? '#guides' : '#units' + (state.fac !== 'All' ? '/' + state.fac : '');
 const pushHash = h => { try { history.replaceState(null, '', h); } catch (e) {} };
 function route() {
-  const h = decodeURIComponent(location.hash.replace(/^#\/?/, '')), [a, b, c] = h.split('/');
+  const h = decodeURIComponent(location.hash.replace(/^#\/?/, '')), parts = h.split('/'), [a, b, c] = parts;
   let open = null;
   if (a === 'maps' || a === 'map') { state.view = 'maps'; if (a === 'map' && mapById[b]) open = () => { openMap(b); if (c && drawImport(b, c)) showMap(b, mapLayout); }; }
   else if (a === 'guides') state.view = 'guides';
   else if (a === 'changes') state.view = 'changes';
+  else if (a === 'equiv') state.view = 'equiv';
+  else if (a === 'army') { state.view = 'army'; if (b) armyDec(parts.slice(1).join('/')); }
+  else if (a === 'brief') { state.view = 'brief'; briefRoute(parts[1], parts[2], parts[3]); }
+  else if (a === 'roles') { state.view = 'roles'; rolesRoute(parts[1], parts[2], parts[3], parts[4], parts[5]); }
   else if (a === 'plan') { state.view = 'plan'; if (b && planDecode(b)) pushHash('#plan'); }
   else if (a === 'vs') { state.view = 'vs'; const [x, y, na, nb] = (b || '').split(','); if (byId[x] && byId[y]) { vsA = x; vsB = y; if (+na > 0) vsNA = Math.min(999, Math.round(+na)); if (+nb > 0) vsNB = Math.min(999, Math.round(+nb)); } }
   else if (a === 'tree') { state.view = 'tree'; if (FACS.includes(b)) { state.tfac = b; store.set('barTFac', b); } }
@@ -146,9 +150,9 @@ function route() {
 }
 
 // ---- chrome: top bar, hero, sidebar ----------------------------------------
-const TITLES = { units: 'Units', tree: 'Tech tree', maps: 'Maps', guides: 'Build guides', changes: 'Balance changes', vs: 'Versus', plan: 'Build planner' };
+const TITLES = { units: 'Units', tree: 'Tech tree', maps: 'Maps', guides: 'Build guides', changes: 'Balance changes', vs: 'Versus', plan: 'Build planner', army: 'Army builder', brief: 'Map briefing', roles: 'Team roles', equiv: 'Faction equivalents' };
 function buildNav() {
-  const items = [['units', 'Units', U.length], ['tree', 'Tech tree', null], ['vs', 'Versus', null], ['plan', 'Planner', null], ['maps', 'Maps', MAPS.length], ['changes', 'Changes', CHG.length ? CHG[0].changed.length + CHG[0].added.length + CHG[0].removed.length : null], ['guides', 'Guides', null]];
+  const items = [['units', 'Units', U.length], ['tree', 'Tech tree', null], ['vs', 'Versus', null], ['plan', 'Planner', null], ['army', 'Army', null], ['equiv', 'Equivalents', null], ['maps', 'Maps', MAPS.length], ['brief', 'Briefing', null], ['roles', 'Team roles', null], ['changes', 'Changes', CHG.length ? CHG[0].changed.length + CHG[0].added.length + CHG[0].removed.length : null], ['guides', 'Guides', null]];
   $('#nav1').innerHTML = items.map(([v, t, n]) => `<button data-view="${v}"${state.view === v ? ' aria-current="page"' : ''}>${t}${n ? `<small>${n}</small>` : ''}</button>`).join('');
   document.title = `${TITLES[state.view]} · BAR Unit Database`;
 }
@@ -217,6 +221,10 @@ function render() {
   if (state.view === 'changes') { renderChanges(); return; }
   if (state.view === 'vs') { renderVs(); return; }
   if (state.view === 'plan') { renderPlan(); return; }
+  if (state.view === 'army') { renderArmy(); return; }
+  if (state.view === 'brief') { renderBrief(); return; }
+  if (state.view === 'roles') { renderRoles(); return; }
+  if (state.view === 'equiv') { renderEquiv(); return; }
   const q = state.q.trim().toLowerCase();
   buildTypes(q); updateFavBtn();
   const l = U.filter(u => inFac(u) && (!state.cat.size || state.cat.has(u.cat)) && (!state.tier.size || state.tier.has(u.tier)) && matchText(u, q) && inRange(u) && (!state.favOnly || favs.has(u.id)));
@@ -331,5 +339,5 @@ document.addEventListener('keydown', e => {
 });
 window.addEventListener('hashchange', route);
 
-loadCmp(); vsLoad(); planLoad(); theme(); build(); buildRanges(); render(); renderTray();
+loadCmp(); vsLoad(); planLoad(); armyLoad(); briefLoad(); rolesLoad(); eqLoad(); theme(); build(); buildRanges(); render(); renderTray();
 if (location.hash) route();

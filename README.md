@@ -45,7 +45,16 @@ How each faction unlocks its tech, with hover highlighting.
 - Build orders per faction and playstyle: opening, 1v1, team frontline, economy and air, FFA and naval, with tips and common mistakes.
 - **Planner**: stages with check marks. Ticked items add their metal, energy and build power, and everything left is timed against the income you'd have by then.
 - Counts energy converters and extractors on real metal spots, and warns when there's no free spot.
+- **Income timeline**: metal, energy and build power over the course of the plan, with the stretches where income (not build power) holds you back shaded.
 - Pick a faction, commander, map, start position and wind level. Share a plan as a link or as text.
+
+### 🪖 Army builder and faction equivalents
+- **Army builder**: build two armies from any mix of units, see what each can and cannot hit (anti-air, ships, subs) with one-click fixes, then fight them in a simulation. Shareable link.
+- **Equivalents**: the three factions side by side by category, tech level and role.
+
+### 🧭 Map briefing and team roles
+- **Briefing**: pick a map and start position for its wind-or-solar advice, metal spots at home, spawn role and a suggested opener with its timing on that map.
+- **Team roles**: give each spawn on your team a role (frontline, economy, air, naval), get the matching guide and income plan for each, and a check for holes in the team. Shareable link.
 
 ### 📈 Changes
 Unit changes between BAR versions, filterable by faction and buff or nerf.
