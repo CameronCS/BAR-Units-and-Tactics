@@ -1,10 +1,12 @@
 // Faction equivalents: the three factions' units side by side, grouped by category, tech level and role.
 // Roles are guessed from each unit's description (and, for buildings, its section), so the match is a guide, not an official pairing.
 const EQ_ROLES = [
-  ['Builders', /constructor|builder|engineer|construction|assist|rez|repair|reclaim|resurrect/i], ['Anti-air', /anti-air|\baa\b|air defen|flak|interceptor|fighter/i],
-  ['Scouts and intel', /scout|radar|sonar|jammer|spy/i], ['Transports', /transport/i], ['Bombers', /bomber/i], ['Gunships', /gunship/i],
-  ['Submarines', /submarine|torpedo/i], ['Artillery and missiles', /artillery|mortar|rocket|missile|plasma|howitzer|long.?range|launcher/i],
-  ['Skirmishers and snipers', /skirmish|sniper|laser|beam/i], ['Raiders', /raider|fast|light|swarm|infantry/i], ['Assault and tanks', /assault|heavy|tank|battle|main|combat|riot|destroyer|cruiser|brawl|armored/i]
+  ['Commanders', /commander/i], ['Anti-nuke', /anti-nuke/i], ['Drone carriers', /drone carrier/i],
+  ['Builders', /constructor|constructs|builder|engineer|construction|assist|rez|repair|reclaim|resurrect/i], ['Anti-air', /anti-air|\baa\b|air defen|flak|interceptor|fighter/i],
+  ['Scouts and intel', /scout|radar|sonar|jammer|spy/i], ['Transports', /transport/i], ['Bombers', /bomber/i], ['Suicide bombs', /\bbomb\b|self-destruct/i], ['Gunships', /gunship/i],
+  ['Submarines', /submarine|torpedo/i], ['Minelayers', /minelayer/i], ['Artillery and missiles', /artillery|mortar|rocket|missile|plasma|howitzer|long.?range|launcher/i],
+  ['Skirmishers and snipers', /skirmish|sniper|laser|beam/i], ['Raiders', /raider|fast|light|swarm|infantry/i],
+  ['Assault and tanks', /assault|heavy|tank|battle|main|combat|riot|destroyer|cruiser|brawl|armored|flagship|fortress|mech|tachyon|siege/i], ['Amphibious', /amphibious/i]
 ];
 const eqRole = u => { if (u.cat === 'Buildings') return u._sec || 'Other'; const d = u.desc || ''; const r = EQ_ROLES.find(([, re]) => re.test(d)); return r ? r[0] : 'Other'; };
 const eqState = { cat: 'Bots', tier: 'All', q: '' };
@@ -16,9 +18,9 @@ function eqLoad() {
 }
 const eqSave = () => { try { localStorage.setItem('barEq', JSON.stringify({ cat: eqState.cat, tier: eqState.tier })); } catch (e) {} };
 
-function eqCell(list) {
-  if (!list.length) return '<td class="none">No unit</td>';
-  return `<td>${list.map(u => `<button class="eqc" data-plopen="${u.id}" style="--c:${FCOL[u.faction]}"><span class="art"><img loading="lazy" src="img/${u.id}.webp" alt="" onerror="this.style.visibility='hidden'"></span>
+function eqCell(list, f) {
+  if (!list.length) return `<td class="none" data-f="${f}" style="--fc:${FCOL[f]}">No unit</td>`;
+  return `<td data-f="${f}" style="--fc:${FCOL[f]}">${list.map(u => `<button class="eqc" data-plopen="${u.id}" style="--c:${FCOL[u.faction]}"><span class="art"><img loading="lazy" src="img/${u.id}.webp" alt="" onerror="this.style.visibility='hidden'"></span>
     <span><b>${u.name}</b><small>${fmt(u.metal)} metal, ${fmt(u.hp)} health${u._dps && !/com$/.test(u.id) ? ', ' + fmt(Math.round(u._dps)) + ' dps' : ''}${u._range ? ', range ' + fmt(u._range) : ''}${u.speed ? ', speed ' + fmt(u.speed) : ''}</small></span></button>`).join('')}</td>`;
 }
 function renderEquiv() {
@@ -31,7 +33,7 @@ function renderEquiv() {
   rows.forEach(g => {
     if (g.tier !== tier) { tier = g.tier; html += `<tr class="eqt"><th colspan="4">Tech ${g.tier}</th></tr>`; }
     Object.values(g.by).forEach(a => a.sort((x, y) => x.metal - y.metal));
-    html += `<tr><th class="eqr">${g.role}</th>${FACS.map(f => eqCell(g.by[f])).join('')}</tr>`;
+    html += `<tr><th class="eqr">${g.role}</th>${FACS.map(f => eqCell(g.by[f], f)).join('')}</tr>`;
   });
   $('#grid').innerHTML = `<div class="mhead"><h2 class="gh">Faction equivalents</h2>
     <p class="gb">The three factions side by side. Units are grouped by tech level and role, which is guessed from each unit's description, so use it as a guide to what fills the same job.</p></div>

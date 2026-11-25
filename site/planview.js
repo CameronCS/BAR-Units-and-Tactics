@@ -171,7 +171,7 @@ function planChart(sim) {
   const note = stall.length
     ? `Shaded stretches are where your income, not your build power, sets the pace: ${stall.length} ${stall.length === 1 ? 'unit' : 'units'}, ${clock(stall.reduce((s, x) => s + x.t1 - x.t0, 0))} in all. The longest is ${worst.name} (${clock(worst.t1 - worst.t0)}, held back by ${worst.lim.toLowerCase()}).`
     : 'Nothing in this plan is held back by income: build power is the limit all the way through.';
-  return `<section class="plsec"><h3 class="cap">Income timeline</h3><svg class="plchart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Metal, energy and build power over the course of the plan">${svg}</svg><p class="note">${note} Time counts from now, with ticked items already built.</p></section>`;
+  return `<section class="plsec"><h3 class="cap">Income timeline</h3><div class="plcw"><svg class="plchart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Metal, energy and build power over the course of the plan">${svg}</svg></div><p class="note">${note} Time counts from now, with ticked items already built.</p></section>`;
 }
 
 function renderPlan() {
