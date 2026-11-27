@@ -72,6 +72,8 @@ document.addEventListener('click', e => {
   else if (k === 'vs-link') copyText(pageBase() + '#vs/' + vsA + ',' + vsB + ',' + vsNA + ',' + vsNB, b);
   else if (k === 'vs-text') copyText(vsText(), b);
   else if (k === 'army-link') copyText(pageBase() + '#army/' + armyEnc(), b);
+  else if (k === 'ctr-link') copyText(pageBase() + ctrHash(), b);
+  else if (k === 'mx-link') copyText(pageBase() + mxHash(), b);
   else if (k === 'brief-link') copyText(pageBase() + briefHash(), b);
   else if (k === 'roles-link') copyText(pageBase() + rolesHash(), b);
   else if (k === 'roles-text') copyText(rolesText(), b);

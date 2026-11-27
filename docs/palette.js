@@ -2,7 +2,7 @@
 // Also the phone menu button, which folds the top bar's sections into a dropdown.
 const PAGES = [['units', 'Units', 'Browse every unit and building'], ['tree', 'Tech tree', 'How each faction unlocks its tech'], ['vs', 'Versus', 'Pit two units against each other'],
   ['plan', 'Build planner', 'How long a build list takes and what it costs'],
-  ['army', 'Army builder', 'Mix units into an army, see its gaps and fight it'], ['equiv', 'Faction equivalents', 'The three factions side by side by role'],
+  ['army', 'Army builder', 'Mix units into an army, see its gaps and fight it'], ['counter', 'Counters', 'Name the enemy army and get the best units against it'], ['matrix', 'Matchup matrix', 'A grid of units against each other'], ['equiv', 'Faction equivalents', 'The three factions side by side by role'],
   ['brief', 'Map briefing', 'Metal, energy, spawn role and an opener for a map'], ['roles', 'Team roles', 'Give each spawn a role and plan the team'],
   ['maps', 'Maps', 'Official maps and spawn locations'], ['changes', 'Changes', 'Balance changes between updates'], ['guides', 'Guides', 'Build orders and team roles']];
 let palOpen = false, palItems = [], palSel = 0, palBack = null;

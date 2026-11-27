@@ -17,11 +17,11 @@ const store = {
 let openSet = new Set(store.get('barOpen', []));
 state.fac = FACS.includes(store.get('barFac', '')) ? store.get('barFac', '') : 'All';
 state.tfac = FACS.includes(store.get('barTFac', '')) ? store.get('barTFac', '') : 'Armada';
-state.view = ['guides', 'maps', 'tree', 'changes', 'vs', 'plan', 'army', 'brief', 'roles', 'equiv'].includes(store.get('barView', 'units')) ? store.get('barView', 'units') : 'units';
+state.view = ['guides', 'maps', 'tree', 'changes', 'vs', 'plan', 'army', 'brief', 'roles', 'equiv', 'counter', 'matrix'].includes(store.get('barView', 'units')) ? store.get('barView', 'units') : 'units';
 state.gfac = FACS.includes(store.get('barGFac', '')) ? store.get('barGFac', '') : 'Armada';
 state.gstyle = store.get('barGStyle', 'opener');
 state.dens = store.get('barDens', 'cards') === 'list' ? 'list' : 'cards';
-const theme = () => { document.body.dataset.fac = state.view === 'guides' ? state.gfac : state.view === 'tree' ? state.tfac : ['maps', 'changes', 'vs', 'plan', 'army', 'brief', 'roles', 'equiv'].includes(state.view) ? 'All' : state.fac; };
+const theme = () => { document.body.dataset.fac = state.view === 'guides' ? state.gfac : state.view === 'tree' ? state.tfac : ['maps', 'changes', 'vs', 'plan', 'army', 'brief', 'roles', 'equiv', 'counter', 'matrix'].includes(state.view) ? 'All' : state.fac; };
 
 // ---- starred units (kept in this browser)
 const favs = new Set(); try { JSON.parse(localStorage.getItem('barFav') || '[]').forEach(id => byId[id] && favs.add(id)); } catch (e) {}
@@ -126,7 +126,7 @@ const short = x => x.replace(/ \(.*\)/, '');
 
 // ---- routing: shareable links ---------------------------------------------
 // #units  #units/Cortex  #maps  #guides  #unit/armpw  #map/<file name>
-const viewHash = () => state.view === 'tree' ? '#tree/' + state.tfac : state.view === 'maps' ? (mapPage ? '#map/' + encodeURIComponent(mapPage) : '#maps') : state.view === 'changes' ? '#changes' : state.view === 'plan' ? '#plan' : state.view === 'army' ? '#army/' + armyEnc() : state.view === 'brief' ? briefHash() : state.view === 'roles' ? rolesHash() : state.view === 'equiv' ? '#equiv' : state.view === 'vs' ? '#vs/' + vsA + ',' + vsB + ',' + vsNA + ',' + vsNB : state.view === 'guides' ? '#guides' : '#units' + (state.fac !== 'All' ? '/' + state.fac : '');
+const viewHash = () => state.view === 'tree' ? '#tree/' + state.tfac : state.view === 'maps' ? (mapPage ? '#map/' + encodeURIComponent(mapPage) : '#maps') : state.view === 'changes' ? '#changes' : state.view === 'plan' ? '#plan' : state.view === 'army' ? '#army/' + armyEnc() : state.view === 'brief' ? briefHash() : state.view === 'roles' ? rolesHash() : state.view === 'equiv' ? '#equiv' : state.view === 'counter' ? ctrHash() : state.view === 'matrix' ? mxHash() : state.view === 'vs' ? '#vs/' + vsA + ',' + vsB + ',' + vsNA + ',' + vsNB : state.view === 'guides' ? '#guides' : '#units' + (state.fac !== 'All' ? '/' + state.fac : '');
 const pushHash = h => { try { history.replaceState(null, '', h); } catch (e) {} };
 function route() {
   const h = decodeURIComponent(location.hash.replace(/^#\/?/, '')), parts = h.split('/'), [a, b, c] = parts;
@@ -135,6 +135,8 @@ function route() {
   else if (a === 'guides') state.view = 'guides';
   else if (a === 'changes') state.view = 'changes';
   else if (a === 'equiv') state.view = 'equiv';
+  else if (a === 'counter') { state.view = 'counter'; if (b) ctrDec(b); }
+  else if (a === 'matrix') { state.view = 'matrix'; if (b) mxDec(b); }
   else if (a === 'army') { state.view = 'army'; if (b) armyDec(parts.slice(1).join('/')); }
   else if (a === 'brief') { state.view = 'brief'; briefRoute(parts[1], parts[2], parts[3]); }
   else if (a === 'roles') { state.view = 'roles'; rolesRoute(parts[1], parts[2], parts[3], parts[4], parts[5], parts[6], parts[7]); }
@@ -150,9 +152,9 @@ function route() {
 }
 
 // ---- chrome: top bar, hero, sidebar ----------------------------------------
-const TITLES = { units: 'Units', tree: 'Tech tree', maps: 'Maps', guides: 'Build guides', changes: 'Balance changes', vs: 'Versus', plan: 'Build planner', army: 'Army builder', brief: 'Map briefing', roles: 'Team roles', equiv: 'Faction equivalents' };
+const TITLES = { units: 'Units', tree: 'Tech tree', maps: 'Maps', guides: 'Build guides', changes: 'Balance changes', vs: 'Versus', plan: 'Build planner', army: 'Army builder', brief: 'Map briefing', roles: 'Team roles', equiv: 'Faction equivalents', counter: 'Counters', matrix: 'Matchup matrix' };
 // the sections, grouped so the bar stays short: each group is a dropdown on a wide screen and a labelled list in the phone menu
-const NAVG = [['Units', [['units', 'Units'], ['tree', 'Tech tree'], ['equiv', 'Equivalents'], ['changes', 'Changes']]], ['Fight', [['vs', 'Versus'], ['army', 'Army builder']]],
+const NAVG = [['Units', [['units', 'Units'], ['tree', 'Tech tree'], ['equiv', 'Equivalents'], ['changes', 'Changes']]], ['Fight', [['vs', 'Versus'], ['army', 'Army builder'], ['counter', 'Counters'], ['matrix', 'Matrix']]],
   ['Plan', [['plan', 'Planner'], ['guides', 'Guides']]], ['Maps', [['maps', 'Maps'], ['brief', 'Briefing'], ['roles', 'Team roles']]]];
 function buildNav() {
   const cnt = { units: U.length, maps: MAPS.length, changes: CHG.length ? CHG[0].changed.length + CHG[0].added.length + CHG[0].removed.length : null };
@@ -229,6 +231,8 @@ function render() {
   if (state.view === 'brief') { renderBrief(); return; }
   if (state.view === 'roles') { renderRoles(); return; }
   if (state.view === 'equiv') { renderEquiv(); return; }
+  if (state.view === 'counter') { renderCounter(); return; }
+  if (state.view === 'matrix') { renderMatrix(); return; }
   const q = state.q.trim().toLowerCase();
   buildTypes(q); updateFavBtn();
   const l = U.filter(u => inFac(u) && (!state.cat.size || state.cat.has(u.cat)) && (!state.tier.size || state.tier.has(u.tier)) && matchText(u, q) && inRange(u) && (!state.favOnly || favs.has(u.id)));
@@ -351,5 +355,5 @@ document.addEventListener('keydown', e => {
 });
 window.addEventListener('hashchange', route);
 
-loadCmp(); vsLoad(); planLoad(); armyLoad(); briefLoad(); rolesLoad(); eqLoad(); theme(); build(); buildRanges(); render(); renderTray();
+loadCmp(); vsLoad(); planLoad(); armyLoad(); briefLoad(); rolesLoad(); eqLoad(); ctrLoad(); mxLoad(); theme(); build(); buildRanges(); render(); renderTray();
 if (location.hash) route();

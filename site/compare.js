@@ -30,6 +30,7 @@ function renderTray() {
 // ---- the comparison panel --------------------------------------------------
 const ROWS = [
   ['Metal cost', u => u.metal, 'low', 'metal'], ['Energy cost', u => u.energy, 'low', 'energy'], ['Build time', u => u.bt, 'low', 'bt'],
+  ['Default build time', u => { const d = defaultBuildTime(u); return d ? d.t : null; }, 'low', null, v => clock(v)],
   ['Health', u => u.hp, 'high', 'hp'], ['Speed', u => u.speed, 'high', 'speed'], ['Sight', u => u.los, 'high', 'los'],
   ['Damage per second', u => u._dps, 'high', 'dps'], ['Range', u => u._range, 'high', 'range'],
   ['Health per metal', u => u.metal ? u.hp / u.metal : null, 'high'], ['Damage per metal', u => u.metal && u._dps ? u._dps / u.metal : null, 'high']
@@ -54,14 +55,14 @@ function openCompare() {
   const head = us.map((u, k) => `<div class="cvh" style="--c:${CMP_COL[k]}"><div class="art" style="--c:${FCOL[u.faction]}"><img src="img/lg/${u.id}.webp" alt="" onerror="this.onerror=null;this.src='img/${u.id}.webp'"></div>
       <h3>${u.name}</h3><div class="cvs">${u.faction}, tech ${u.tier}</div><div class="cvd">${u.desc || ''}</div>
       <a class="cvopen" data-open="${u.id}" tabindex="0">Open details</a></div>`).join('');
-  const rows = ROWS.map(([label, f, best, cap]) => {
+  const rows = ROWS.map(([label, f, best, cap, show]) => {
     const vals = us.map(f), nums = vals.filter(v => v != null && v > 0);
     if (!nums.length) return '';
     const max = Math.max(...nums), win = best === 'low' ? Math.min(...nums) : max;
     const dup = nums.filter(v => v === win).length > 1;
     return `<div class="cvr" style="${cols}"><div class="cvl">${label}</div>${vals.map((v, k) => {
       const w = v > 0 ? Math.max(4, Math.round(v / max * 100)) : 0, isBest = v > 0 && v === win && !dup && us.length > 1;
-      return `<div class="cvc${isBest ? ' best' : ''}"><span class="cvb"><i style="width:${w}%;background:${CMP_COL[k]}"></i></span><b>${v > 0 ? fmt(v) : '–'}</b></div>`;
+      return `<div class="cvc${isBest ? ' best' : ''}"><span class="cvb"><i style="width:${w}%;background:${CMP_COL[k]}"></i></span><b>${v > 0 ? (show ? show(v) : fmt(v)) : '–'}</b></div>`;
     }).join('')}</div>`;
   }).join('');
   const mus = us.map((u, k) => { const m = matchups(u); return `<div class="cvc mus" style="--c:${CMP_COL[k]}">${m.S.slice(0, 3).map(x => `<span class="pill s">${short(x)}</span>`).join('')}${m.W.slice(0, 3).map(x => `<span class="pill w">${short(x)}</span>`).join('')}</div>`; }).join('');

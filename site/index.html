@@ -578,6 +578,18 @@ blockquote{margin:var(--s3) 0;padding:6px 0 6px var(--s4);border-left:4px solid 
   .rowhdr span:nth-child(n+7),.urow .n:nth-child(n+7){display:none}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+
+.ctrbar{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:var(--s3)}.ctrbar i{width:1px;height:20px;background:var(--line2);margin:0 4px}.ctrh{color:var(--mute);font-size:13px;margin-right:4px;min-width:78px}
+.ctrbar .vsswap{margin-top:0}.ctrbar .vsswap[aria-pressed=true]{border-color:var(--c,var(--acc));color:var(--c,var(--acc))}.ctrbar .vsrg{margin:0}
+.ctre1{display:inline-flex;align-items:center;gap:6px;background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--c);padding:3px 4px 3px 8px;font-size:13px}.ctre1 input{width:54px;background:var(--bg2);color:var(--ink);border:1px solid var(--line2);padding:3px 4px;font:inherit}.ctre1 button{background:none;border:0;color:var(--mute);cursor:pointer;font-size:16px;padding:0 4px}.ctre1 button:hover{color:var(--bad)}
+.ctrsec{font:800 18px var(--head);letter-spacing:.6px;text-transform:uppercase;margin:var(--s4) 0 var(--s2)}.ctrgap{color:var(--bad)}
+.ctrcol{display:grid;gap:6px}.ctrcol.wide{grid-template-columns:repeat(auto-fill,minmax(280px,1fr))}.ctrgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:var(--s3)}
+.ctrp{background:var(--panel);border:1px solid var(--line);padding:var(--s2) var(--s3)}.ctrph{display:flex;justify-content:space-between;gap:var(--s2);margin-bottom:6px}.ctrph small{color:var(--mute)}
+.ctrc{display:flex;align-items:center;gap:8px;background:var(--bg2);border:1px solid var(--line);border-left:3px solid var(--c);color:var(--ink);padding:5px 8px;cursor:pointer;font:inherit;text-align:left}.ctrc:hover{border-color:var(--c)}
+.ctrc .art{width:34px;height:34px;flex:none}.ctrc .art img{width:100%;height:100%;object-fit:contain}.ctrt{flex:1;min-width:0;display:grid}.ctrt small{color:var(--mute);font-size:11px}.ctre{font:800 16px var(--head);color:var(--good)}
+.mxt{border-collapse:collapse;font-size:13px}.mxt th,.mxt td{border:1px solid var(--line);padding:6px 8px;text-align:center;min-width:54px}.mxt thead th{vertical-align:bottom;font-weight:600}.mxt tbody th{text-align:left;position:sticky;left:0;background:var(--bg2)}
+.mxt td[data-mxa]{cursor:pointer;font-weight:700;color:var(--ink)}.mxt td[data-mxa]:hover{outline:2px solid var(--acc);outline-offset:-2px}.mxt .mxn{color:var(--mute)}.mxt .mxs{color:var(--mute);background:var(--panel)}.mxt .mxo{font-weight:800;background:var(--panel)}
+.mxh{display:inline-flex;align-items:center;gap:6px;border-left:3px solid var(--c);padding-left:6px;white-space:nowrap}.mxh img{width:26px;height:26px;object-fit:contain}
 </style>
 </head>
 <body data-fac="All">
@@ -626,6 +638,8 @@ blockquote{margin:var(--s3) 0;padding:6px 0 6px var(--s4);border-left:4px solid 
 <script src="compare.js"></script>
 <script src="tree.js"></script>
 <script src="vsview.js"></script>
+<script src="counterview.js"></script>
+<script src="matrixview.js"></script>
 <script src="planview.js"></script>
 <script src="army.js"></script>
 <script src="equiv.js"></script>

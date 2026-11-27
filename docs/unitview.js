@@ -32,6 +32,12 @@ const srow = (label, val, cap, cls, text) => val == null || val === 0 ? '' :
   `<div class="sr"><span class="sl">${label}</span><span class="stk ${cls}"><i style="width:${Math.max(3, barPct(val, cap))}%"></i><b>${text == null ? fmt(val) : text}</b></span></div>`;
 
 // seconds to build at full speed with each builder that can make this unit, working alone
+// default construction time: the first regular builder listed for this unit, working alone
+function defaultBuildTime(u) {
+  if (!u.bt) return null;
+  for (const id of [...(builtBy[u.id] || []), ...(u.expby || [])]) { const b = byId[id]; if (b && b.worker > 0 && !/decom$/.test(id)) return { b, t: u.bt / b.worker }; }
+  return null;
+}
 function buildTimeBlock(u) {
   if (!u.bt) return '';
   const ids = [...(builtBy[u.id] || []), ...(u.expby || [])], seen = new Set(), rows = [];
@@ -88,7 +94,7 @@ function show(id) {
         <div class="two">
           <div>
             <h3 class="cap">Cost</h3>
-            ${srow('Metal', u.metal, CAP.metal, 'k-metal')}${srow('Energy', u.energy, CAP.energy, 'k-energy')}${srow('Build time', u.bt, CAP.bt, 'k-bt')}
+            ${srow('Metal', u.metal, CAP.metal, 'k-metal')}${srow('Energy', u.energy, CAP.energy, 'k-energy')}${srow('Build time', u.bt, CAP.bt, 'k-bt', (d => d ? `${fmt(u.bt)} <small style="color:var(--mute)">· ${clock(d.t)} by ${d.b.name}</small>` : null)(defaultBuildTime(u)))}
             ${buildTimeBlock(u)}
             <h3 class="cap">General stats</h3>
             ${srow('Health', u.hp, CAP.hp, 'k-hp')}${srow('Speed', u.speed, CAP.speed, 'k-speed')}${srow('Sight', u.los, CAP.los, 'k-sight')}
